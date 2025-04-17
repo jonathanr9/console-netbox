@@ -390,5 +390,15 @@ try {
             break;
             
         }
-    }
+    } catch (Exception $e) {
+            // Gestion générique des exceptions
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erreur du serveur : ' . $e->getMessage(),
+                'code' => $e->getCode(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            error_log('Erreur API : ' . $e->getMessage());
+        }
+    
 ?>
