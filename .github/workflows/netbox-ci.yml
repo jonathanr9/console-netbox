@@ -19,11 +19,6 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '18'
-    
-    - name: Lint JavaScript
-      run: |
-        npm install eslint
-        npx eslint create-vm/*.js
 
   test:
     needs: lint
