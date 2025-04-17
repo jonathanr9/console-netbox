@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Création de VM dans Ridmi</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Création de VM dans Ridmi</h1>
+        
+        <!-- Indicateur d'étapes -->
+        <div class="step-indicator">
+            <div class="step-line">
+                <div class="step-line-progress" id="step-progress"></div>
+            </div>
+            <div class="step-dot active" id="dot-1" title="Connexion"></div>
+            <div class="step-dot" id="dot-2" title="Configuration"></div>
+            <div class="step-dot" id="dot-3" title="Confirmation"></div>
+        </div>
+        
+        <!-- Étape 1: Connexion à Ridmi -->
+        <div id="step-1" class="step active">
+            <h2>Connexion à Ridmi</h2>
+            <div class="form-group">
+                <label for="netbox-url">URL Ridmi :</label>
+                <input type="url" id="netbox-url" name="netbox_url" placeholder="https://ridmi.exemple.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="api-token">Token API :</label>
+                <input type="password" id="api-token" name="api_token" placeholder="Entrez votre token API" required>
+            </div>
+            
+            <button id="connect-button">Se connecter et récupérer les données</button>
+            <div id="connect-spinner" class="spinner"></div>
+            <div id="connect-error" class="result error" style="display: none;"></div>
+        </div>
+        
+        <!-- Étape 2: Sélection des paramètres -->
+        <div id="step-2" class="step">
+            <h2>Informations de base</h2>
+            <div class="form-group">
+                <label for="vm-name">Nom de la VM :
+                    <span class="tooltip">ℹ️
+                        <span class="tooltiptext">
+                            <b>Le nom doit respecter les règles suivantes :</b>
+                            - Contenir exactement 9 caractères
+                            - Contenir uniquement des lettres minuscules ou des chiffres <br>
+                            <b>Le nom est constuit en concaténant 5 champs :</b>
+                            - Localisation (1 caractère alphanumérique) correspond au site informatique
+                            - Localisation complémentaire (1 caractère alphabétique) informe sur une position fonctionnelle ou
+                            physique, un mode de raccordement à l’intérieur d’une localisation.
+                            - Fonction (1 caractère alphanumérique) est définie en fonction de la localisation complémentaire
+                            - Environnement (1 caractère alphabétique) correspond au domaine d’activité  de l'objet
+                            - Référence (5 caractères alpha numériques)
+                        </span>
+                    </span> 
+                </label>
+                <input type="text" id="vm-name" name="vm_name" placeholder="Ex : rsppa7221" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="vm-description">Description de la VM:</label>
+                <textarea id="vm-description" name="vm_description" placeholder="Entrez une description pour la VM" rows="1"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="device-site">Site :</label>
+                <select id="device-site" name="device_site" required>
+                    <option value="">Sélectionnez un site</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="device-role">Rôle :</label>
+                <select id="device-role" name="device_role">
+                    <option value="">Sélectionnez un rôle</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="vm-tenant">Tenant :</label>
+                <select id="vm-tenant" name="vm_tenant">
+                    <option value="">Sélectionnez un tenant</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="vm-cluster">Cluster :</label>
+                <select id="vm-cluster" name="vm_cluster">
+                    <option value="">Sélectionnez un cluster</option>
+                </select>
+            </div>
+
+            <h2>Configuration des ressources</h2>
+            <div class="form-group">
+                <label for="vm-vcpus">vCPUs:</label>
+                <input type="number" id="vm-vcpus" name="vm_vcpus" placeholder="Nombre de vCPUs" min="1" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="vm-memory">Mémoire (MiB):</label>
+                <input type="number" id="vm-memory" name="vm_memory" placeholder="Mémoire en MiB" min="1" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="vm-status">Statut:</label>
+                <select id="vm-status" name="vm_status" required>
+                    <option value="">Sélectionnez un statut</option>
+                </select>
+            </div>
+            
+            <!-- Configuration des disques virtuels -->
+            <h2>Disques virtuels</h2>
+            <div id="disks-container">
+                <div class="disk-entry">
+                    <h3>Disque 1</h3>
+                    <div class="form-group">
+                        <label for="disk-name-1">Nom du disque:</label>
+                        <input type="text" id="disk-name-1" name="disk_name_1" placeholder="Disque 1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="disk-size-1">Taille (GiB):</label>
+                        <input type="number" id="disk-size-1" name="disk_size_1" placeholder="Taille en GiB" min="1" value="10" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="disk-description-1">Description:</label>
+                        <textarea id="disk-description-1" name="disk_description_1" placeholder="Description du disque" rows="2"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="add-disk-button" class="secondary-button">Ajouter un disque virtuel</button>
+            
+            <!-- Configuration des interfaces réseau -->
+            <h2>Interfaces réseau</h2>
+            <div id="interfaces-container">
+                <div class="interface-entry">
+                    <h3>Interface 1</h3>
+                    <div class="form-group">
+                        <label for="interface-name-1">Nom de l'interface:</label>
+                        <input type="text" id="interface-name-1" name="interface_name_1" placeholder="Interface 1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="interface-ip-1">Adresse IP:</label>
+                        <input type="text" id="interface-ip-1" name="interface_ip_1" placeholder="ex: 192.168.1.1/24" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="interface-description-1">Description de l'interface:</label>
+                        <textarea id="interface-description-1" name="interface_description_1" placeholder="Description de l'interface" rows="2"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="add-interface-button" class="secondary-button">Ajouter une interface réseau</button>
+
+            <div class="step-nav">
+                <button class="back" id="back-to-step1">Retour</button>
+                <button class="next" id="next-to-step3">Continuer</button>
+            </div>
+        </div>
+        
+        <!-- Étape 3: Confirmation et création -->
+        <div id="step-3" class="step">
+            <h2>Confirmer la création</h2>
+            <div class="result" style="display: block; background-color: #f8f9fa; border-left-color: #6c757d;">
+                <h3>Récapitulatif</h3>
+                <p><strong>URL Ridmi:</strong> <span id="summary-url"></span></p>
+                <p><strong>Nom de la VM:</strong> <span id="summary-name"></span></p>
+                <p><strong>Ressources:</strong> <span id="summary-resources"></span></p>
+                <div id="summary-disks">
+                    <h4>Disques virtuels:</h4>
+                </div>
+                <div id="summary-interfaces">
+                    <h4>Interfaces réseau:</h4>
+                </div>
+            </div>
+            
+            <div class="step-nav">
+                <button class="back" id="back-to-step2">Retour</button>
+                <button class="next" id="create-button">Créer la VM</button>
+            </div>
+            
+            <div id="create-spinner" class="spinner"></div>
+            <div id="create-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="navigation-bar">
+            <a href="../index.html" class="nav-button">Retour à l'accueil</a>
+        </div>
+    </div>
+    
+    <script src="validateVmName.js" type="module"></script>
+    <script src="check_vm_exist.js" type="module"></script>
+    <script src="create-vm.js" type="module"></script>
+</body>
+</html>
