@@ -31,9 +31,6 @@ jobs:
       with:
         node-version: '18'
     
-    - name: Install dependencies
-      run: npm install
-    
     - name: Run JavaScript tests
       run: npx jest create-vm/*.test.js
     
@@ -74,12 +71,6 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '18'
-    
-    - name: Install dependencies
-      run: npm install
-    
-    - name: Build assets
-      run: npm run build
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
