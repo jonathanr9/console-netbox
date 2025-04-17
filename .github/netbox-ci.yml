@@ -1,0 +1,142 @@
+name: netbox CI/CD Workflow
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Lint PHP
+      run: php -l api.php
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Lint JavaScript
+      run: |
+        npm install eslint
+        npx eslint create-vm/*.js
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      run: npm install
+    
+    - name: Run JavaScript tests
+      run: npx jest create-vm/*.test.js
+    
+    - name: Test API Connectivity
+      env:
+        netbox_URL: ${{ secrets.netbox_URL }}
+        netbox_TOKEN: ${{ secrets.netbox_TOKEN }}
+      run: |
+        php -r '
+        $netboxUrl = getenv("netbox_URL");
+        $apiToken = getenv("netbox_TOKEN");
+        
+        $ch = curl_init("$netboxUrl/api/");
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+          "Authorization: Token $apiToken",
+          "Accept: application/json"
+        ]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        
+        if ($httpCode >= 200 && $httpCode < 300) {
+          echo "Connexion à l'API netbox réussie\n";
+          exit(0);
+        } else {
+          echo "Échec de connexion à l'API netbox : Code HTTP $httpCode\n";
+          exit(1);
+        }
+        '
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      run: npm install
+    
+    - name: Build assets
+      run: npm run build
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: netbox-dist
+        path: dist/
+        retention-days: 7
+
+  deploy-staging:
+    needs: build
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: netbox-dist
+        path: dist/
+    
+    - name: Deploy to Staging
+      env:
+        STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+        STAGING_SERVER_IP: ${{ secrets.STAGING_SERVER_IP }}
+        STAGING_USER: ${{ secrets.STAGING_USER }}
+      run: |
+        echo "$STAGING_SSH_KEY" > deploy_key
+        chmod 600 deploy_key
+        ssh-keyscan -H $STAGING_SERVER_IP >> ~/.ssh/known_hosts
+        rsync -avz -e "ssh -i deploy_key" dist/ $STAGING_USER@$STAGING_SERVER_IP:/var/www/netbox-staging/
+
+  deploy-production:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: netbox-dist
+        path: dist/
+    
+    - name: Deploy to Production
+      env:
+        PRODUCTION_SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+        PRODUCTION_SERVER_IP: ${{ secrets.PRODUCTION_SERVER_IP }}
+        PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
+      run: |
+        echo "$PRODUCTION_SSH_KEY" > deploy_key
+        chmod 600 deploy_key
+        ssh-keyscan -H $PRODUCTION_SERVER_IP >> ~/.ssh/known_hosts
+        rsync -avz -e "ssh -i deploy_key" dist/ $PRODUCTION_USER@$PRODUCTION_SERVER_IP:/var/www/netbox/
