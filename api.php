@@ -67,7 +67,7 @@ function callNetboxApi($url, $token, $endpoint, $method = 'GET', $data = null) {
             $debug['error'] = 'file_get_contents returned false';
             return [
                 'success' => false,
-                'message' => 'Erreur de connexion à l\'API Ridmi',
+                'message' => 'Erreur de connexion à l\'API netbox',
                 'debug' => $debug
             ];
         }
@@ -349,7 +349,7 @@ try {
             
         case 'verify_connection':
             if (!checkRequiredFields(['netbox_url', 'api_token'], $requestData)) {
-                echo json_encode(['success' => false, 'message' => 'URL Ridmi et token API requis']);
+                echo json_encode(['success' => false, 'message' => 'URL netbox et token API requis']);
                 exit;
             }
             
@@ -367,7 +367,7 @@ try {
             
         case 'get_data':
             if (!checkRequiredFields(['netbox_url', 'api_token'], $requestData)) {
-                echo json_encode(['success' => false, 'message' => 'URL Ridmi et token API requis']);
+                echo json_encode(['success' => false, 'message' => 'URL netbox et token API requis']);
                 exit;
             }
             
@@ -388,7 +388,7 @@ try {
                 
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Impossible de se connecter à Ridmi: ' . $connectionCheck['message'],
+                    'message' => 'Impossible de se connecter à netbox: ' . $connectionCheck['message'],
                     'error_type' => 'connection_error'
                 ]);
                 exit;

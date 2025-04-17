@@ -121,7 +121,7 @@ function connectToNetbox() {
             
             errorDiv.innerHTML = `
                 <h3>Erreur de connexion</h3>
-                <p>${response.message || 'Impossible de se connecter à Ridmi'}</p>
+                <p>${response.message || 'Impossible de se connecter à netbox'}</p>
                 ${debugInfo}
                 ${debugDetails}
             `;
@@ -455,7 +455,7 @@ function createVM() {
             
             resultDiv.innerHTML = `
             <h3>VM créée avec succès</h3>
-            <p>La VM "${netboxData.vm.name}" a été créée dans Ridmi.</p>
+            <p>La VM "${netboxData.vm.name}" a été créée dans netbox.</p>
             <p>URL de la VM: <a href="${netboxData.url}/virtualization/virtual-machines/${response.data.id}" target="_blank">${netboxData.url}/virtualization/virtual-machines/${response.data.id}</a></p>
             ${disksInfo}
         `;

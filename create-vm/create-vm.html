@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Création de VM dans Ridmi</title>
+    <title>Création de VM dans netbox</title>
     <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Création de VM dans Ridmi</h1>
+        <h1>Création de VM dans netbox</h1>
         
         <!-- Indicateur d'étapes -->
         <div class="step-indicator">
@@ -20,12 +20,12 @@
             <div class="step-dot" id="dot-3" title="Confirmation"></div>
         </div>
         
-        <!-- Étape 1: Connexion à Ridmi -->
+        <!-- Étape 1: Connexion à netbox -->
         <div id="step-1" class="step active">
-            <h2>Connexion à Ridmi</h2>
+            <h2>Connexion à netbox</h2>
             <div class="form-group">
-                <label for="netbox-url">URL Ridmi :</label>
-                <input type="url" id="netbox-url" name="netbox_url" placeholder="https://ridmi.exemple.com" required>
+                <label for="netbox-url">URL netbox :</label>
+                <input type="url" id="netbox-url" name="netbox_url" placeholder="https://netbox.exemple.com" required>
             </div>
             
             <div class="form-group">
@@ -171,7 +171,7 @@
             <h2>Confirmer la création</h2>
             <div class="result" style="display: block; background-color: #f8f9fa; border-left-color: #6c757d;">
                 <h3>Récapitulatif</h3>
-                <p><strong>URL Ridmi:</strong> <span id="summary-url"></span></p>
+                <p><strong>URL netbox:</strong> <span id="summary-url"></span></p>
                 <p><strong>Nom de la VM:</strong> <span id="summary-name"></span></p>
                 <p><strong>Ressources:</strong> <span id="summary-resources"></span></p>
                 <div id="summary-disks">
