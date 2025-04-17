@@ -7,26 +7,45 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  tests:
+  code-quality:
     name: Tests et Analyse de Code
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0  # Nécessaire pour SonarCloud
+        # Permet de pousser les modifications automatiques
+        persist-credentials: false
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.1'
         coverage: xdebug
-        tools: phpunit, phpcs
+        tools: phpunit, phpcs, php-cs-fixer
 
     - name: Lint PHP
       run: php -l api.php
 
     - name: Vérification du style de code PHP
+      id: phpcs
+      continue-on-error: true
       run: phpcs --standard=PSR2 api.php
+
+    - name: Correction automatique du style PHP
+      if: steps.phpcs.outcome == 'failure'
+      run: |
+        php-cs-fixer fix api.php --rules=@PSR2
+        
+        # Configurer git
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Vérifier s'il y a des modifications
+        if [[ `git status --porcelain` ]]; then
+          git add api.php
+          git commit -m "Style: Correction automatique du code PHP"
+        fi
 
     - name: Exécuter les tests PHPUnit
       run: |
